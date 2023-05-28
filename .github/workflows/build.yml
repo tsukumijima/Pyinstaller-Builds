@@ -12,35 +12,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: mingw64, arch: 64bit, env: x86_64 }
-          - { sys: mingw32, arch: 32bit, env: i686 }
-
-    defaults:
-      run:
-        shell: msys2 {0}
+          - { arch: 64bit, env: x86_64 }
+          - { arch: 32bit, env: i686 }
 
     steps:
-      - name: Set up MinGW
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          msystem: ${{matrix.sys}}
-          install: >-
-            base-devel
-            mingw-w64-${{matrix.env}}-toolchain
-            mingw-w64-${{matrix.env}}-python
-            mingw-w64-${{matrix.env}}-python-pip
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           repository: pyinstaller/pyinstaller
           ref: v5.11.0
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
       - name: Build bootloader
         run: |
           cd bootloader
-          python waf distclean all --target-arch=${{matrix.arch}} --gcc
+          python waf distclean all --target-arch=${{matrix.arch}}
 
       - name: Build packages
         run: |
